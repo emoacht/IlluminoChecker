@@ -1,0 +1,38 @@
+﻿<Window x:Class="AdaptiveBrightnessChecker.MainWindow"
+		xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		x:Name="WindowRoot"
+		Title="Adaptive Brightness Checker"
+		Height="120" Width="360" ResizeMode="NoResize">
+	<Grid>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition/>
+			<ColumnDefinition/>
+		</Grid.ColumnDefinitions>
+		<Grid.RowDefinitions>
+			<RowDefinition/>
+			<RowDefinition/>
+			<RowDefinition/>
+		</Grid.RowDefinitions>
+
+		<TextBlock Grid.Row="0" Grid.Column="0"
+				   HorizontalAlignment="Center" VerticalAlignment="Center">
+			<Run Text="Illuminance: "/>
+			<Run FontSize="16"
+				 Text="{Binding ElementName=WindowRoot, Path=Illuminance}"/>
+		</TextBlock>
+		<TextBlock Grid.Row="0" Grid.Column="1"
+				   HorizontalAlignment="Center" VerticalAlignment="Center">
+			<Run Text="Adaptive Brightness: "/>
+			<Run FontSize="16"
+				 Text="{Binding ElementName=WindowRoot, Path=AdaptiveBrightness}"/>
+		</TextBlock>
+		<Button Grid.Row="1" Grid.ColumnSpan="2"
+				Content="Check"
+				IsEnabled="{Binding ElementName=WindowRoot, Path=IsReady}"
+				Click="CheckButton_Click"/>
+		<TextBlock Grid.Row="2" Grid.ColumnSpan="2"
+				   HorizontalAlignment="Center" VerticalAlignment="Center"
+				   Text="{Binding ElementName=WindowRoot, Path=Status}"/>
+	</Grid>
+</Window>
