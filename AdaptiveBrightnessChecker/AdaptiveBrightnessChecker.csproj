@@ -83,6 +83,7 @@
   <ItemGroup>
     <Compile Include="MSMonitor.cs" />
     <Compile Include="PowerManagement.cs" />
+    <Compile Include="PowerWatcher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
