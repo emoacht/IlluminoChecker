@@ -18,53 +18,49 @@ namespace AdaptiveBrightnessChecker
 		[DllImport("PowrProf.dll")]
 		private static extern uint PowerGetActiveScheme(
 			IntPtr UserRootPowerKey, // Always null
-			out IntPtr activePolicyGuid); // Using Guid here doesn't work.
-
-		[DllImport("Kernel32.dll", SetLastError = true)]
-		private static extern IntPtr LocalFree(
-			IntPtr hMem);
+			[MarshalAs(UnmanagedType.LPStruct)] out Guid activePolicyGuid);
 
 		[DllImport("PowrProf.dll")]
 		private static extern uint PowerReadACValueIndex(
 			IntPtr RootPowerKey, // Always null
-			ref Guid SchemeGuid,
-			ref Guid SubGroupOfPowerSettingsGuid,
-			ref Guid PowerSettingGuid,
+			[MarshalAs(UnmanagedType.LPStruct), In] Guid SchemeGuid,
+			[MarshalAs(UnmanagedType.LPStruct), In] Guid SubGroupOfPowerSettingsGuid,
+			[MarshalAs(UnmanagedType.LPStruct), In] Guid PowerSettingGuid,
 			out uint AcValueIndex);
 
 		[DllImport("PowrProf.dll")]
 		private static extern uint PowerReadDCValueIndex(
 			IntPtr RootPowerKey, // Always null
-			ref Guid SchemeGuid,
-			ref Guid SubGroupOfPowerSettingsGuid,
-			ref Guid PowerSettingGuid,
+			[MarshalAs(UnmanagedType.LPStruct), In] Guid SchemeGuid,
+			[MarshalAs(UnmanagedType.LPStruct), In] Guid SubGroupOfPowerSettingsGuid,
+			[MarshalAs(UnmanagedType.LPStruct), In] Guid PowerSettingGuid,
 			out uint DcValueIndex);
 
 		[DllImport("PowrProf.dll")]
 		private static extern uint PowerWriteACValueIndex(
 			IntPtr RootPowerKey, // Always null
-			ref Guid SchemeGuid,
-			ref Guid SubGroupOfPowerSettingsGuid,
-			ref Guid PowerSettingGuid,
+			[MarshalAs(UnmanagedType.LPStruct), In] Guid SchemeGuid,
+			[MarshalAs(UnmanagedType.LPStruct), In] Guid SubGroupOfPowerSettingsGuid,
+			[MarshalAs(UnmanagedType.LPStruct), In] Guid PowerSettingGuid,
 			uint AcValueIndex);
 
 		[DllImport("PowrProf.dll")]
 		private static extern uint PowerWriteDCValueIndex(
 			IntPtr RootPowerKey, // Always null
-			ref Guid SchemeGuid,
-			ref Guid SubGroupOfPowerSettingsGuid,
-			ref Guid PowerSettingGuid,
+			[MarshalAs(UnmanagedType.LPStruct), In] Guid SchemeGuid,
+			[MarshalAs(UnmanagedType.LPStruct), In] Guid SubGroupOfPowerSettingsGuid,
+			[MarshalAs(UnmanagedType.LPStruct), In] Guid PowerSettingGuid,
 			uint DcValueIndex);
 
 		[DllImport("PowrProf.dll")]
 		private static extern uint PowerSetActiveScheme(
 			IntPtr UserRootPowerKey, // Always null
-			ref Guid SchemeGuid);
+			[MarshalAs(UnmanagedType.LPStruct), In] Guid SchemeGuid);
 
 		[DllImport("Kernel32.dll", SetLastError = true)]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		private static extern bool GetSystemPowerStatus(
-			ref SYSTEM_POWER_STATUS systemPowerStatus);
+			out SYSTEM_POWER_STATUS systemPowerStatus);
 
 		[StructLayout(LayoutKind.Sequential)]
 		private struct SYSTEM_POWER_STATUS
@@ -81,29 +77,22 @@ namespace AdaptiveBrightnessChecker
 
 		#endregion
 
-		private static readonly Guid SUB_VIDEO = new Guid("7516b95f-f776-4464-8c53-06167f40cc99");
-		private static readonly Guid ADAPTBRIGHT = new Guid("fbd9aa66-9553-4097-ba44-ed6e9d65eab8");
-		private static readonly Guid VIDEO_BRIGHTNESS = new Guid("aded5e82-b909-4619-9949-f5d71dac0bcb");
-		private static readonly Guid VIDEO_DIM_BRIGHTNESS = new Guid("f1fbfde2-a960-4165-9f88-50667911ce96");
+		// Video settings derived from winnt.h
+		private static readonly Guid VIDEO_SUBGROUP = new Guid("7516b95f-f776-4464-8c53-06167f40cc99");
+		internal static readonly Guid VIDEO_ADAPTIVE_DISPLAY_BRIGHTNESS = new Guid("fbd9aa66-9553-4097-ba44-ed6e9d65eab8");
+		private static readonly Guid DEVICE_POWER_POLICY_VIDEO_BRIGHTNESS = new Guid("aded5e82-b909-4619-9949-f5d71dac0bcb");
+		private static readonly Guid DEVICE_POWER_POLICY_VIDEO_DIM_BRIGHTNESS = new Guid("f1fbfde2-a960-4165-9f88-50667911ce96");
 
 		public static Guid GetActiveScheme()
 		{
-			var activePolicyGuid = IntPtr.Zero;
-			try
+			if (PowerGetActiveScheme(
+				IntPtr.Zero,
+				out Guid activePolicyGuid) != ERROR_SUCCESS)
 			{
-				if (PowerGetActiveScheme(
-					IntPtr.Zero,
-					out activePolicyGuid) != ERROR_SUCCESS)
-				{
-					Debug.WriteLine("Failed to get active scheme.");
-					return default(Guid);
-				}
-				return Marshal.PtrToStructure<Guid>(activePolicyGuid);
+				Debug.WriteLine("Failed to get active scheme.");
+				return default;
 			}
-			finally
-			{
-				LocalFree(activePolicyGuid);
-			}
+			return activePolicyGuid;
 		}
 
 		#region Adaptive Brightness
@@ -114,18 +103,16 @@ namespace AdaptiveBrightnessChecker
 			if (!isOnline.HasValue)
 				return null;
 
-			Guid schemeGuid = GetActiveScheme();
-			Guid subGroupOfPowerSettingsGuid = SUB_VIDEO;
-			Guid powerSettingGuid = ADAPTBRIGHT;
-			uint valueIndex = 0;
+			var schemeGuid = GetActiveScheme();
+			uint valueIndex;
 
 			if (isOnline.Value)
 			{
 				if (PowerReadACValueIndex(
 					IntPtr.Zero,
-					ref schemeGuid,
-					ref subGroupOfPowerSettingsGuid,
-					ref powerSettingGuid,
+					schemeGuid,
+					VIDEO_SUBGROUP,
+					VIDEO_ADAPTIVE_DISPLAY_BRIGHTNESS,
 					out valueIndex) != ERROR_SUCCESS)
 				{
 					Debug.WriteLine("Failed to read AC Adaptive Brightness.");
@@ -136,9 +123,9 @@ namespace AdaptiveBrightnessChecker
 			{
 				if (PowerReadDCValueIndex(
 					IntPtr.Zero,
-					ref schemeGuid,
-					ref subGroupOfPowerSettingsGuid,
-					ref powerSettingGuid,
+					schemeGuid,
+					VIDEO_SUBGROUP,
+					VIDEO_ADAPTIVE_DISPLAY_BRIGHTNESS,
 					out valueIndex) != ERROR_SUCCESS)
 				{
 					Debug.WriteLine("Failed to read DC Adaptive Brightness.");
@@ -157,18 +144,16 @@ namespace AdaptiveBrightnessChecker
 			if (!isOnline.HasValue)
 				return false;
 
-			Guid schemeGuid = GetActiveScheme();
-			Guid subGroupOfPowerSettingsGuid = SUB_VIDEO;
-			Guid powerSettingGuid = ADAPTBRIGHT;
+			var schemeGuid = GetActiveScheme();
 			uint valueIndex = enable ? 1U : 0U;
 
 			if (isOnline.Value)
 			{
 				if (PowerWriteACValueIndex(
 					IntPtr.Zero,
-					ref schemeGuid,
-					ref subGroupOfPowerSettingsGuid,
-					ref powerSettingGuid,
+					schemeGuid,
+					VIDEO_SUBGROUP,
+					VIDEO_ADAPTIVE_DISPLAY_BRIGHTNESS,
 					valueIndex) != ERROR_SUCCESS)
 				{
 					Debug.WriteLine("Failed to write AC Adaptive Brightness.");
@@ -179,9 +164,9 @@ namespace AdaptiveBrightnessChecker
 			{
 				if (PowerWriteDCValueIndex(
 					IntPtr.Zero,
-					ref schemeGuid,
-					ref subGroupOfPowerSettingsGuid,
-					ref powerSettingGuid,
+					schemeGuid,
+					VIDEO_SUBGROUP,
+					VIDEO_ADAPTIVE_DISPLAY_BRIGHTNESS,
 					valueIndex) != ERROR_SUCCESS)
 				{
 					Debug.WriteLine("Failed to write DC Adaptive Brightness.");
@@ -191,7 +176,7 @@ namespace AdaptiveBrightnessChecker
 
 			if (PowerSetActiveScheme(
 				IntPtr.Zero,
-				ref schemeGuid) != ERROR_SUCCESS)
+				schemeGuid) != ERROR_SUCCESS)
 			{
 				Debug.WriteLine("Failed to set active scheme.");
 				return false;
@@ -209,18 +194,16 @@ namespace AdaptiveBrightnessChecker
 			if (!isOnline.HasValue)
 				return -1;
 
-			Guid schemeGuid = GetActiveScheme();
-			Guid subGroupOfPowerSettingsGuid = SUB_VIDEO;
-			Guid powerSettingGuid = VIDEO_BRIGHTNESS;
+			var schemeGuid = GetActiveScheme();
 			uint valueIndex;
 
 			if (isOnline.Value)
 			{
 				if (PowerReadACValueIndex(
 					IntPtr.Zero,
-					ref schemeGuid,
-					ref subGroupOfPowerSettingsGuid,
-					ref powerSettingGuid,
+					schemeGuid,
+					VIDEO_SUBGROUP,
+					DEVICE_POWER_POLICY_VIDEO_BRIGHTNESS,
 					out valueIndex) != ERROR_SUCCESS)
 				{
 					Debug.WriteLine("Failed to read AC Brightness.");
@@ -231,9 +214,9 @@ namespace AdaptiveBrightnessChecker
 			{
 				if (PowerReadDCValueIndex(
 					IntPtr.Zero,
-					ref schemeGuid,
-					ref subGroupOfPowerSettingsGuid,
-					ref powerSettingGuid,
+					schemeGuid,
+					VIDEO_SUBGROUP,
+					DEVICE_POWER_POLICY_VIDEO_BRIGHTNESS,
 					out valueIndex) != ERROR_SUCCESS)
 				{
 					Debug.WriteLine("Failed to read DC Brightness.");
@@ -252,17 +235,15 @@ namespace AdaptiveBrightnessChecker
 			if (!isOnline.HasValue)
 				return false;
 
-			Guid schemeGuid = GetActiveScheme();
-			Guid subGroupOfPowerSettingsGuid = SUB_VIDEO;
-			Guid powerSettingGuid = VIDEO_BRIGHTNESS;
+			var schemeGuid = GetActiveScheme();
 
 			if (isOnline.Value)
 			{
 				if (PowerWriteACValueIndex(
 					IntPtr.Zero,
-					ref schemeGuid,
-					ref subGroupOfPowerSettingsGuid,
-					ref powerSettingGuid,
+					schemeGuid,
+					VIDEO_SUBGROUP,
+					DEVICE_POWER_POLICY_VIDEO_BRIGHTNESS,
 					(uint)brightness) != ERROR_SUCCESS)
 				{
 					Debug.WriteLine("Failed to write AC Brightness.");
@@ -273,9 +254,9 @@ namespace AdaptiveBrightnessChecker
 			{
 				if (PowerWriteDCValueIndex(
 					IntPtr.Zero,
-					ref schemeGuid,
-					ref subGroupOfPowerSettingsGuid,
-					ref powerSettingGuid,
+					schemeGuid,
+					VIDEO_SUBGROUP,
+					DEVICE_POWER_POLICY_VIDEO_BRIGHTNESS,
 					(uint)brightness) != ERROR_SUCCESS)
 				{
 					Debug.WriteLine("Failed to write DC Brightness");
@@ -285,7 +266,7 @@ namespace AdaptiveBrightnessChecker
 
 			if (PowerSetActiveScheme(
 				IntPtr.Zero,
-				ref schemeGuid) != ERROR_SUCCESS)
+				schemeGuid) != ERROR_SUCCESS)
 			{
 				Debug.WriteLine("Failed to set active scheme.");
 				return false;
@@ -299,9 +280,7 @@ namespace AdaptiveBrightnessChecker
 
 		public static bool? IsOnline()
 		{
-			var systemPowerStatus = new SYSTEM_POWER_STATUS();
-
-			if (GetSystemPowerStatus(ref systemPowerStatus))
+			if (GetSystemPowerStatus(out SYSTEM_POWER_STATUS systemPowerStatus))
 			{
 				switch (systemPowerStatus.ACLineStatus)
 				{
