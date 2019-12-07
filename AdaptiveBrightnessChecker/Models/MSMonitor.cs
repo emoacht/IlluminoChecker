@@ -5,7 +5,7 @@ using System.Management;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AdaptiveBrightnessChecker
+namespace AdaptiveBrightnessChecker.Models
 {
 	/// <summary>
 	/// MSMonitorClass Functions

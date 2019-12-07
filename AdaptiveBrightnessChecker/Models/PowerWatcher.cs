@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Interop;
 
-namespace AdaptiveBrightnessChecker
+namespace AdaptiveBrightnessChecker.Models
 {
 	internal sealed class PowerWatcher : IDisposable
 	{
