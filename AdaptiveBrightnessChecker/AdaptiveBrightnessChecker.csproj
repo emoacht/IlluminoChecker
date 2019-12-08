@@ -81,6 +81,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BooleanToStringConverter.cs" />
     <Compile Include="Models\MSMonitor.cs" />
     <Compile Include="Models\PowerManagement.cs" />
     <Compile Include="Models\PowerWatcher.cs" />

@@ -14,11 +14,14 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Windows.Devices.Sensors;
 
+using AdaptiveBrightnessChecker.Models;
+
 namespace AdaptiveBrightnessChecker
 {
 	public partial class MainWindow : Window
 	{
 		private readonly LightSensor _sensor;
+		private readonly PowerWatcher _watcher;
 
 		public MainWindow()
 		{
@@ -26,58 +29,64 @@ namespace AdaptiveBrightnessChecker
 			this.Loaded += OnLoaded;
 
 			_sensor = LightSensor.GetDefault();
-			var reading = _sensor?.GetCurrentReading();
-			if (reading != null)
+			if (_sensor != null)
 			{
-				Illuminance = (int)reading.IlluminanceInLux;
+				var reading = _sensor.GetCurrentReading();
+				if (reading != null)
+					AmbientLight = (int)reading.IlluminanceInLux;
 
-				_sensor.ReadingChanged += (sender, args) =>
+				_sensor.ReadingChanged += (sender, e) =>
 				{
-					this.Dispatcher.Invoke(() => Illuminance = (int)args.Reading.IlluminanceInLux);
+					this.Dispatcher.Invoke(() => AmbientLight = (int)e.Reading.IlluminanceInLux);
 				};
 			}
 
-			var isEnabled = PowerManagement.IsActiveSchemeAdaptiveBrightnessEnabled();
-			if (isEnabled.HasValue)
+			if (PowerManagement.IsActiveSchemeAdaptiveBrightnessEnabled() == true)
+				IsAdaptiveBrightnessEnabled = true;
+
+			_watcher = new PowerWatcher(this, PowerManagement.VIDEO_ADAPTIVE_DISPLAY_BRIGHTNESS);
+			_watcher.PowerSettingChanged += (sender, e) =>
 			{
-				AdaptiveBrightness = isEnabled.Value ? "On" : "Off";
-			}
+				// 0: Off
+				// 1: On
+				IsAdaptiveBrightnessEnabled = (e.Data == 1);
+			};
 		}
 
 		#region Property
 
-		public int Illuminance
+		public int AmbientLight
 		{
-			get { return (int)GetValue(IlluminanceProperty); }
-			set { SetValue(IlluminanceProperty, value); }
+			get { return (int)GetValue(AmbientLightProperty); }
+			set { SetValue(AmbientLightProperty, value); }
 		}
-		public static readonly DependencyProperty IlluminanceProperty =
+		public static readonly DependencyProperty AmbientLightProperty =
 			DependencyProperty.Register(
-				"Illuminance",
+				"AmbientLight",
 				typeof(int),
 				typeof(MainWindow),
 				new PropertyMetadata(-1));
 
-		public string AdaptiveBrightness
+		public bool IsAdaptiveBrightnessEnabled
 		{
-			get { return (string)GetValue(AdaptiveBrightnessProperty); }
-			set { SetValue(AdaptiveBrightnessProperty, value); }
+			get { return (bool)GetValue(IsAdaptiveBrightnessEnabledProperty); }
+			set { SetValue(IsAdaptiveBrightnessEnabledProperty, value); }
 		}
-		public static readonly DependencyProperty AdaptiveBrightnessProperty =
+		public static readonly DependencyProperty IsAdaptiveBrightnessEnabledProperty =
 			DependencyProperty.Register(
-				"AdaptiveBrightness",
-				typeof(string),
+				"IsAdaptiveBrightnessEnabled",
+				typeof(bool),
 				typeof(MainWindow),
-				new PropertyMetadata(null));
+				new PropertyMetadata(false));
 
-		public bool IsReady
+		public bool CanCheck
 		{
-			get { return (bool)GetValue(IsReadyProperty); }
-			set { SetValue(IsReadyProperty, value); }
+			get { return (bool)GetValue(CanCheckProperty); }
+			set { SetValue(CanCheckProperty, value); }
 		}
-		public static readonly DependencyProperty IsReadyProperty =
+		public static readonly DependencyProperty CanCheckProperty =
 			DependencyProperty.Register(
-				"IsReady",
+				"CanCheck",
 				typeof(bool),
 				typeof(MainWindow),
 				new PropertyMetadata(true));
@@ -97,7 +106,6 @@ namespace AdaptiveBrightnessChecker
 		#endregion
 
 		private const string StartArguments = "/start";
-		private readonly TimeSpan Interval = TimeSpan.FromMilliseconds(500);
 
 		private async void OnLoaded(object sender, RoutedEventArgs e)
 		{
@@ -105,63 +113,49 @@ namespace AdaptiveBrightnessChecker
 				await CheckAsync();
 		}
 
-		private async void CheckButton_Click(object sender, RoutedEventArgs e)
-		{
-			await CheckAsync();
-		}
+		private async void Check(object sender, RoutedEventArgs e) => await CheckAsync();
+
+		private readonly TimeSpan _interval = TimeSpan.FromMilliseconds(500);
 
 		private async Task CheckAsync()
 		{
 			try
 			{
-				IsReady = false;
-
-				Debug.WriteLine("[Start]");
+				CanCheck = false;
 
 				var startBrightness = PowerManagement.GetActiveSchemeBrightness();
 				var startTime = DateTime.Now;
 
-				var result = await IncrementBrightnessAsync();
-				Debug.WriteLine(result);
+				var buffer = new StringBuilder("Ambient Light, Original, Adjusted");
+
+				for (int brightness = 0; brightness <= 100; brightness++)
+				{
+					if (!PowerManagement.SetActiveSchemeBrightness(brightness))
+						break;
+
+					await Task.Delay(_interval);
+
+					var original = PowerManagement.GetActiveSchemeBrightness();
+					var actual = MSMonitor.GetBrightness();
+
+					Status = $"Ambient Light: {AmbientLight}, Original: {original}, Adjusted: {actual}";
+					Debug.WriteLine(Status);
+
+					buffer.AppendLine($"{AmbientLight}, {original}, {actual}");
+				}
 
 				PowerManagement.SetActiveSchemeBrightness(startBrightness);
 
 				await Task.Run(() => File.WriteAllText(
 					$"{startTime:MMddhhmmss}.txt",
-					$"{startTime:MM/dd hh:mm:ss}" + Environment.NewLine + result));
+					$"{startTime:MM/dd hh:mm:ss}" + Environment.NewLine + buffer.ToString()));
 
-				Debug.WriteLine("[End]");
-
-				await Task.Delay(Interval);
 				Status = null;
 			}
 			finally
 			{
-				IsReady = true;
+				CanCheck = true;
 			}
-		}
-
-		private async Task<string> IncrementBrightnessAsync()
-		{
-			var sb = new StringBuilder();
-			sb.AppendLine("Illuminance, Original, Adjusted");
-
-			for (int brightness = 0; brightness <= 100; brightness++)
-			{
-				if (!PowerManagement.SetActiveSchemeBrightness(brightness))
-					break;
-
-				await Task.Delay(Interval);
-
-				var setting = PowerManagement.GetActiveSchemeBrightness();
-				var actual = MSMonitor.GetBrightness();
-				Status = $"Illuminance: {Illuminance}, Original: {setting}, Adjusted: {actual}";
-				Debug.WriteLine(Status);
-
-				sb.AppendLine($"{Illuminance}, {setting}, {actual}");
-			}
-
-			return sb.ToString();
 		}
 	}
 }
