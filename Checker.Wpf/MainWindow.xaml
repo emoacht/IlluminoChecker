@@ -1,0 +1,45 @@
+﻿<Window x:Class="Checker.Wpf.MainWindow"
+		xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:local="clr-namespace:Checker.Wpf"
+		x:Name="WindowRoot"
+		Title="Adaptive Brightness Checker"
+		Height="120" Width="360" ResizeMode="NoResize">
+	<Window.Resources>
+		<local:BooleanToStringConverter x:Key="BooleanToDeviceStateConverterKey" TrueString="On" FalseString="Off"/>
+		<local:BooleanToStringConverter x:Key="BooleanToCheckStateConverterKey" TrueString="Check" FalseString="Checking"/>
+	</Window.Resources>
+
+	<Grid>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition/>
+			<ColumnDefinition/>
+		</Grid.ColumnDefinitions>
+		<Grid.RowDefinitions>
+			<RowDefinition/>
+			<RowDefinition/>
+			<RowDefinition/>
+		</Grid.RowDefinitions>
+
+		<TextBlock Grid.Row="0" Grid.Column="0"
+				   HorizontalAlignment="Center" VerticalAlignment="Center">
+			<Run Text="Ambient Light: "/>
+			<Run FontSize="16"
+				 Text="{Binding ElementName=WindowRoot, Path=AmbientLight}"/>
+		</TextBlock>
+		<TextBlock Grid.Row="0" Grid.Column="1"
+				   HorizontalAlignment="Center" VerticalAlignment="Center">
+			<Run Text="Adaptive Brightness: "/>
+			<Run FontSize="16"
+				 Text="{Binding ElementName=WindowRoot, Path=IsAdaptiveBrightnessEnabled, Converter={StaticResource BooleanToDeviceStateConverterKey}}"/>
+		</TextBlock>
+		<Button Grid.Row="1" Grid.ColumnSpan="2"
+				IsEnabled="{Binding ElementName=WindowRoot, Path=CanCheck}"
+				Click="Check">
+			<TextBlock Text="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type Button}}, Path=IsEnabled, Converter={StaticResource BooleanToCheckStateConverterKey}}"/>
+		</Button>
+		<TextBlock Grid.Row="2" Grid.ColumnSpan="2"
+				   HorizontalAlignment="Center" VerticalAlignment="Center"
+				   Text="{Binding ElementName=WindowRoot, Path=Status}"/>
+	</Grid>
+</Window>

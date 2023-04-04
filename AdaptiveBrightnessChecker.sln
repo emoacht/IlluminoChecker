@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33516.290
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdaptiveBrightnessChecker", "AdaptiveBrightnessChecker\AdaptiveBrightnessChecker.csproj", "{B0F73FB8-07A6-4DD6-8EBE-AA78D6EAFEE8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Checker.Wpf", "Checker.Wpf\Checker.Wpf.csproj", "{B0F73FB8-07A6-4DD6-8EBE-AA78D6EAFEE8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,5 +18,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {70CD9B0E-34BE-4702-A0F9-C31F626ABA4A}
 	EndGlobalSection
 EndGlobal
