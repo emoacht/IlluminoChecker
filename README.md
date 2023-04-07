@@ -1,4 +1,4 @@
-﻿# Adaptive Brightness Checker
+﻿# Illumino Checker
 
 Check adaptive brightness with ambient light sensor.
 
