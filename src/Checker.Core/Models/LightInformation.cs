@@ -1,7 +1,7 @@
 ﻿using System;
 using Windows.Devices.Sensors;
 
-namespace Checker.Uwp.Models;
+namespace Checker.Core.Models;
 
 internal static class LightInformation
 {

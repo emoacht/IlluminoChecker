@@ -7,7 +7,7 @@ using Windows.Storage;
 using Windows.Storage.Pickers;
 using Encoding = Windows.Storage.Streams.UnicodeEncoding;
 
-namespace Checker.Uwp.Models;
+namespace Checker.Core.Models;
 
 internal static class LogAccess
 {

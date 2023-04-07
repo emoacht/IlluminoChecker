@@ -2,7 +2,7 @@
 using Windows.Graphics.Display;
 using Windows.UI.Xaml;
 
-namespace Checker.Uwp.Models;
+namespace Checker.Core.Models;
 
 internal class BrightnessWatcher
 {

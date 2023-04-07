@@ -6,7 +6,7 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
 
-using Checker.Uwp.Views;
+using Checker.Core.Views;
 
 namespace Checker.Uwp;
 

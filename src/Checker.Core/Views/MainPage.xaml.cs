@@ -8,9 +8,9 @@ using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
-using Checker.Uwp.ViewModels;
+using Checker.Core.ViewModels;
 
-namespace Checker.Uwp.Views;
+namespace Checker.Core.Views;
 
 public sealed partial class MainPage : Page
 {

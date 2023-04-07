@@ -10,10 +10,10 @@ using Windows.UI;
 using Windows.UI.Core;
 using Windows.UI.Xaml.Media;
 
-using Checker.Uwp.Models;
-using Checker.Uwp.Views;
+using Checker.Core.Models;
+using Checker.Core.Views;
 
-namespace Checker.Uwp.ViewModels;
+namespace Checker.Core.ViewModels;
 
 public class MainPageViewModel : ObservableObject
 {

@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 using Windows.Foundation.Collections;
 using Windows.Storage;
 
-namespace Checker.Uwp.Models;
+namespace Checker.Core.Models;
 
 internal static class SettingAccess
 {
