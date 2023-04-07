@@ -103,7 +103,7 @@
 								<LineBreak/>
 								<Hyperlink NavigateUri="https://github.com/emoacht/IlluminoChecker">Site</Hyperlink>
 								<LineBreak/>
-								<Hyperlink NavigateUri="https://github.com/emoacht/IlluminoChecker">License</Hyperlink>
+								<Hyperlink NavigateUri="https://github.com/emoacht/IlluminoChecker/blob/master/docs/LICENSE.md">License</Hyperlink>
 							</TextBlock>
 						</Flyout>
 					</Button.Flyout>
