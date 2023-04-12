@@ -6,7 +6,7 @@
 
   <Identity Name="847f9826-ff5b-4e14-9c96-186afd837d42"
             Publisher="CN=emoacht"
-            Version="1.0.0.0"/>
+            Version="1.0.1.0"/>
 
   <mp:PhoneIdentity PhoneProductId="847f9826-ff5b-4e14-9c96-186afd837d42" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
