@@ -5,11 +5,14 @@
 	  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 	  xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
 	  xmlns:lvc="using:LiveCharts.Uwp"
+	  xmlns:convertrs="using:Checker.Core.Views.Converters"
 	  mc:Ignorable="d"
 	  muxc:BackdropMaterial.ApplyToRootOrPageBackground="True"
 	  x:Name="PageRoot"
 	  d:Width="600" d:Height="360">
 	<Page.Resources>
+		<convertrs:NullableToVisibilityConverter x:Key="NullableToVisibilityConverter"/>
+
 		<Style x:Key="NameTextStyle" TargetType="TextBlock">
 			<Setter Property="Margin" Value="10,0"/>
 			<Setter Property="VerticalAlignment" Value="Center"/>
@@ -51,7 +54,8 @@
 					   Text="{Binding DisplayName, Mode=OneTime}"/>
 		</Grid>
 
-		<Grid Grid.Row="1">
+		<Grid Grid.Row="1"
+			  Visibility="{Binding Illuminance, Mode=OneWay, Converter={StaticResource NullableToVisibilityConverter}, ConverterParameter=Visible}">
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="Auto"/>
 				<ColumnDefinition Width="Auto"/>
@@ -63,7 +67,7 @@
 				<RowDefinition Height="Auto"/>
 				<RowDefinition/>
 			</Grid.RowDefinitions>
-
+			
 			<TextBlock Grid.Column="0" Grid.Row="0"
 					   Style="{StaticResource NameTextStyle}"
 					   Text="Illuminance"/>
@@ -129,6 +133,13 @@
 					</lvc:Axis>
 				</lvc:CartesianChart.AxisY>
 			</lvc:CartesianChart>
+		</Grid>
+
+		<Grid Grid.Row="1"
+			  Visibility="{Binding Illuminance, Mode=OneWay, Converter={StaticResource NullableToVisibilityConverter}, ConverterParameter=Collapsed}">
+			<TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
+					   FontSize="18"
+					   Text="No Ambient Light Sensor"/>
 		</Grid>
 	</Grid>
 </Page>

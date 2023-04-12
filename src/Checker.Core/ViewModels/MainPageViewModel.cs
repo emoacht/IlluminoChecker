@@ -157,6 +157,9 @@ public class MainPageViewModel : ObservableObject
 
 	private async Task InitializeCollectionsAsync()
 	{
+		if (!Illuminance.HasValue)
+			return;
+
 		// https://v0.lvcharts.com/App/examples/v1/Wpf/Line
 
 		SeriesCollection.Add(new LineSeries
