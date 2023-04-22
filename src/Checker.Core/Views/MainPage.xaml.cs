@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics;
+using Microsoft.Toolkit.Uwp.UI;
 using Microsoft.Toolkit.Uwp.UI.Helpers;
+using Microsoft.UI.Xaml.Controls;
 using Windows.ApplicationModel.Core;
 using Windows.Foundation;
 using Windows.UI.Core;
@@ -8,6 +10,7 @@ using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
+using Checker.Core.Helper;
 using Checker.Core.ViewModels;
 
 namespace Checker.Core.Views;
@@ -46,6 +49,16 @@ public sealed partial class MainPage : Page
 
 		ApplicationView.PreferredLaunchViewSize = DefaultSize;
 		ApplicationView.PreferredLaunchWindowingMode = ApplicationViewWindowingMode.PreferredLaunchViewSize;
+
+		if (OsVersion.Is11OrGreater)
+		{
+			BackdropMaterial.SetApplyToRootOrPageBackground(this, true);
+		}
+		else
+		{
+			if (this.FindResource("AcrylicPageStyle") is Style acrylicPageStyle)
+				this.Style = acrylicPageStyle;
+		}
 
 		// Hide default title bar.
 		var coreTitleBar = CoreApplication.GetCurrentView().TitleBar;
