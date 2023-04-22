@@ -7,29 +7,41 @@
 	  xmlns:lvc="using:LiveCharts.Uwp"
 	  xmlns:convertrs="using:Checker.Core.Views.Converters"
 	  mc:Ignorable="d"
-	  muxc:BackdropMaterial.ApplyToRootOrPageBackground="True"
 	  x:Name="PageRoot"
 	  d:Width="600" d:Height="360">
 	<Page.Resources>
-		<convertrs:NullableToVisibilityConverter x:Key="NullableToVisibilityConverter"/>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceDictionary Source="Acrylic.xaml"/>
+			</ResourceDictionary.MergedDictionaries>
 
-		<Style x:Key="NameTextStyle" TargetType="TextBlock">
-			<Setter Property="Margin" Value="10,0"/>
-			<Setter Property="VerticalAlignment" Value="Center"/>
-			<Setter Property="FontSize" Value="16"/>
-		</Style>
+			<Style x:Key="AcrylicPageStyle" TargetType="Page">
+				<Setter Property="Background" Value="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"/>
+			</Style>
 
-		<Style x:Key="ValueTextStyle" TargetType="TextBlock">
-			<Setter Property="VerticalAlignment" Value="Center"/>
-			<Setter Property="FontSize" Value="18"/>
-			<Setter Property="FontWeight" Value="Bold"/>
-		</Style>
+			<convertrs:NullableToVisibilityConverter x:Key="NullableToVisibilityConverter"/>
 
-		<Style x:Key="ActionButtonStyle" TargetType="Button">
-			<Setter Property="VerticalAlignment" Value="Stretch"/>
-			<Setter Property="FontSize" Value="13"/>
-		</Style>
+			<Style x:Key="NameTextStyle" TargetType="TextBlock">
+				<Setter Property="Margin" Value="10,0"/>
+				<Setter Property="VerticalAlignment" Value="Center"/>
+				<Setter Property="FontSize" Value="16"/>
+			</Style>
+
+			<Style x:Key="ValueTextStyle" TargetType="TextBlock">
+				<Setter Property="VerticalAlignment" Value="Center"/>
+				<Setter Property="FontSize" Value="18"/>
+				<Setter Property="FontWeight" Value="Bold"/>
+			</Style>
+
+			<Style x:Key="ActionButtonStyle" TargetType="Button">
+				<Setter Property="VerticalAlignment" Value="Stretch"/>
+				<Setter Property="FontSize" Value="13"/>
+			</Style>
+		</ResourceDictionary>
 	</Page.Resources>
+	<!--<Page.Background>
+		<ThemeResource ResourceKey="AcrylicBackgroundFillColorDefaultBrush"/>
+	</Page.Background>-->
 
 	<Grid>
 		<Grid.RowDefinitions>
@@ -67,7 +79,7 @@
 				<RowDefinition Height="Auto"/>
 				<RowDefinition/>
 			</Grid.RowDefinitions>
-			
+
 			<TextBlock Grid.Column="0" Grid.Row="0"
 					   Style="{StaticResource NameTextStyle}"
 					   Text="Illuminance"/>
