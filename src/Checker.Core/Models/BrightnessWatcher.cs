@@ -8,10 +8,10 @@ internal class BrightnessWatcher
 {
 	public int Brightness { get; private set; }
 
-	private bool SetBrightness(BrightnessOverride instance)
+	private bool UpdateBrightness(BrightnessOverride instance)
 	{
-		var value = instance.GetLevelForScenario(DisplayBrightnessScenario.DefaultBrightness);
-		var brightness = (int)(value * 100D);
+		double value = instance.GetLevelForScenario(DisplayBrightnessScenario.DefaultBrightness);
+		int brightness = (int)(value * 100D);
 		if (Brightness == brightness)
 			return false;
 
@@ -26,7 +26,7 @@ internal class BrightnessWatcher
 	public BrightnessWatcher()
 	{
 		_instance = BrightnessOverride.GetForCurrentView();
-		SetBrightness(_instance);
+		UpdateBrightness(_instance);
 
 		// BrightnessOverride.BrightnessLevelChanged event does not work for capturing adaptive brightness.
 
@@ -39,7 +39,7 @@ internal class BrightnessWatcher
 	private void OnTick(object sender, object e)
 	{
 		_timer.Stop();
-		SetBrightness(_instance);
+		UpdateBrightness(_instance);
 		_timer.Start();
 	}
 
@@ -67,7 +67,7 @@ internal class BrightnessWatcher
 	private TimeSpan _reportInterval = TimeSpan.FromSeconds(1);
 
 	/// <summary>
-	/// Occurs when brightness level has changed
+	/// Occurs when brightness level has changed.
 	/// </summary>
 	/// <remarks>EventArgs indicates brightness level in percentage.</remarks>
 	public event EventHandler<int> BrightnessChanged

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -70,15 +71,6 @@ public class MainPageViewModel : ObservableObject
 	}
 	private double _durationOrigin = 0D;
 
-	public string DisplayName { get; } = Windows.ApplicationModel.Package.Current.DisplayName;
-	public string Version { get; } = GetVersion();
-
-	private static string GetVersion()
-	{
-		var v = Windows.ApplicationModel.Package.Current.Id.Version;
-		return $"{v.Major}.{v.Minor}.{v.Build}.{v.Revision}";
-	}
-
 	#endregion
 
 	#region Command
@@ -111,6 +103,8 @@ public class MainPageViewModel : ObservableObject
 
 	private async void OnAmbientLightChanged(object sender, float e)
 	{
+		Debug.Assert(!_mainPage.Dispatcher.HasThreadAccess);
+
 		await _mainPage.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, async () =>
 		{
 			Illuminance = Round(e);
@@ -120,11 +114,10 @@ public class MainPageViewModel : ObservableObject
 
 	private async void OnBrightnessChanged(object sender, int e)
 	{
-		await _mainPage.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, async () =>
-		{
-			Brightness = e;
-			await UpdateCollectionsAsync(DateTimeOffset.Now);
-		});
+		Debug.Assert(_mainPage.Dispatcher.HasThreadAccess);
+
+		Brightness = e;
+		await UpdateCollectionsAsync(DateTimeOffset.Now);
 	}
 
 	public Task InitializeAsync() => InitializeCollectionsAsync();

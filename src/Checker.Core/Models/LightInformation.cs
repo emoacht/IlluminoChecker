@@ -64,7 +64,7 @@ internal static class LightInformation
 	private static uint _reportInterval = 0;
 
 	/// <summary>
-	/// Occurs when ambient light illuminance has changed
+	/// Occurs when ambient light illuminance has changed.
 	/// </summary>
 	/// <remarks>EventArgs indicates illuminance in lux.</remarks>
 	public static event EventHandler<float> AmbientLightChanged

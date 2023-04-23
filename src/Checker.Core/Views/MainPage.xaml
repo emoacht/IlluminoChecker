@@ -3,9 +3,11 @@
 	  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 	  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	  xmlns:mtuuc="using:Microsoft.Toolkit.Uwp.UI.Converters"
 	  xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
+	  xmlns:wam="using:Windows.ApplicationModel"
 	  xmlns:lvc="using:LiveCharts.Uwp"
-	  xmlns:convertrs="using:Checker.Core.Views.Converters"
+	  xmlns:converters="using:Checker.Core.Views.Converters"
 	  mc:Ignorable="d"
 	  x:Name="PageRoot"
 	  d:Width="600" d:Height="360">
@@ -19,7 +21,15 @@
 				<Setter Property="Background" Value="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"/>
 			</Style>
 
-			<convertrs:NullableToVisibilityConverter x:Key="NullableToVisibilityConverter"/>
+			<mtuuc:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+			<converters:PackageVersionToStringConverter x:Key="PackageVersionToStringConverter"/>
+			<converters:NullableToVisibilityConverter x:Key="NullableToVisibilityConverter"/>
+
+			<Style x:Key="TitleButtonStyle" TargetType="Button" BasedOn="{StaticResource NavigationBackButtonSmallStyle}">
+				<Setter Property="VerticalAlignment" Value="Center"/>
+				<Setter Property="FontFamily" Value="Segoe MDL2 Assets"/>
+				<Setter Property="FontSize" Value="12"/>
+			</Style>
 
 			<Style x:Key="NameTextStyle" TargetType="TextBlock">
 				<Setter Property="Margin" Value="10,0"/>
@@ -61,9 +71,34 @@
 				<ColumnDefinition x:Name="RightPaddingColumn" Width="0"/>
 			</Grid.ColumnDefinitions>
 			<TextBlock Grid.Column="1"
+					   x:Name="TitleTextBlock"
 					   Margin="8,0,0,0" VerticalAlignment="Center"
 					   Style="{StaticResource CaptionTextBlockStyle}"
-					   Text="{Binding DisplayName, Mode=OneTime}"/>
+					   Text="{x:Bind wam:Package.Current.DisplayName}"/>
+		</Grid>
+
+		<Grid Height="{Binding ElementName=AppTitleBar, Path=Height, Mode=OneWay}"
+			  Margin="{Binding ElementName=AppTitleBar, Path=Margin, Mode=OneWay}">
+			<Button Style="{StaticResource TitleButtonStyle}"
+					HorizontalAlignment="Right"
+					Content="&#xE712;">
+				<Button.Flyout>
+					<Flyout>
+						<StackPanel>
+							<Button x:Name="ChartedButton"
+									Style="{StaticResource ActionButtonStyle}"
+									Margin="0,0,0,8"/>
+							<TextBlock>
+								<Run Text="{x:Bind wam:Package.Current.Id.Version, Converter={StaticResource PackageVersionToStringConverter}}"/>
+								<LineBreak/>
+								<Hyperlink NavigateUri="https://github.com/emoacht/IlluminoChecker">Site</Hyperlink>
+								<LineBreak/>
+								<Hyperlink NavigateUri="https://github.com/emoacht/IlluminoChecker/blob/master/docs/LICENSE.md">License</Hyperlink>
+							</TextBlock>
+						</StackPanel>
+					</Flyout>
+				</Button.Flyout>
+			</Button>
 		</Grid>
 
 		<Grid Grid.Row="1"
@@ -110,24 +145,11 @@
 				<Button Style="{StaticResource ActionButtonStyle}"
 						Content="Export"
 						Command="{Binding ExportCommand}"/>
-				<Button Style="{StaticResource ActionButtonStyle}"
-						Content="Info">
-					<Button.Flyout>
-						<Flyout>
-							<TextBlock>
-								<Run Text="{Binding Version, Mode=OneTime}"/>
-								<LineBreak/>
-								<Hyperlink NavigateUri="https://github.com/emoacht/IlluminoChecker">Site</Hyperlink>
-								<LineBreak/>
-								<Hyperlink NavigateUri="https://github.com/emoacht/IlluminoChecker/blob/master/docs/LICENSE.md">License</Hyperlink>
-							</TextBlock>
-						</Flyout>
-					</Button.Flyout>
-				</Button>
 			</StackPanel>
 
 			<lvc:CartesianChart Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="4"
 								Margin="8,4"
+								Visibility="{Binding ElementName=PageRoot, Path=IsCharted, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
 								Series="{Binding SeriesCollection}"
 								LegendLocation="Right">
 				<lvc:CartesianChart.AxisX>
