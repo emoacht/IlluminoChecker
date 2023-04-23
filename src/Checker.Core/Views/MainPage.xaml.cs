@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using Microsoft.Toolkit.Uwp.UI;
+﻿using Microsoft.Toolkit.Uwp.UI;
 using Microsoft.Toolkit.Uwp.UI.Helpers;
 using Microsoft.UI.Xaml.Controls;
 using Windows.ApplicationModel.Core;
@@ -29,15 +28,13 @@ public sealed partial class MainPage : Page
 	public static readonly DependencyProperty SeparatorBrushProperty =
 		DependencyProperty.Register("SeparatorBrush", typeof(Brush), typeof(MainPage), new PropertyMetadata(default(Brush)));
 
-	private void SetSeparatorBrush()
+	public bool IsCharted
 	{
-		var color = Application.Current.RequestedTheme switch
-		{
-			ApplicationTheme.Dark => Windows.UI.Colors.Gray,
-			_ => Windows.UI.Colors.Silver
-		};
-		SeparatorBrush = new SolidColorBrush(color);
+		get => (bool)GetValue(IsChartedProperty);
+		set => SetValue(IsChartedProperty, value);
 	}
+	public static readonly DependencyProperty IsChartedProperty =
+		DependencyProperty.Register("IsCharted", typeof(bool), typeof(MainPage), new PropertyMetadata(true));
 
 	#endregion
 
@@ -70,16 +67,20 @@ public sealed partial class MainPage : Page
 		appTitleBar.ButtonInactiveBackgroundColor = Windows.UI.Colors.Transparent;
 
 		// Set XAML element as a drag region.
-		Window.Current.SetTitleBar(AppTitleBar);
+		Window.Current.SetTitleBar(this.AppTitleBar);
 
 		// Subscribe activated event.
 		Window.Current.Activated += OnActivated;
 
 		// Subscribe theme changed event.
 		var Listener = new ThemeListener();
-		Listener.ThemeChanged += Listener_ThemeChanged;
+		Listener.ThemeChanged += OnThemeChanged;
 
-		SetSeparatorBrush();
+		// Subscribe click event.
+		this.ChartedButton.Click += OnChartedClick;
+
+		UpdateSeparator();
+		UpdateChartedButton();
 	}
 
 	private async void OnLoaded(object sender, RoutedEventArgs e)
@@ -89,10 +90,10 @@ public sealed partial class MainPage : Page
 
 	private void OnLayoutMetricsChanged(CoreApplicationViewTitleBar sender, object args)
 	{
-		UpdateTitleBarLayout(sender);
+		UpdateTitleBar(sender);
 	}
 
-	private void UpdateTitleBarLayout(CoreApplicationViewTitleBar coreTitleBar)
+	private void UpdateTitleBar(CoreApplicationViewTitleBar coreTitleBar)
 	{
 		// Update title bar control size as needed to account for system size changes.
 		AppTitleBar.Height = coreTitleBar.Height;
@@ -107,12 +108,44 @@ public sealed partial class MainPage : Page
 
 	private void OnActivated(object sender, WindowActivatedEventArgs e)
 	{
-		Debug.WriteLine(e.WindowActivationState);
+		UpdateTitleText(e);
 	}
 
-	private void Listener_ThemeChanged(ThemeListener sender)
+	private void UpdateTitleText(WindowActivatedEventArgs e)
 	{
-		Debug.WriteLine(Application.Current.RequestedTheme);
-		SetSeparatorBrush();
+		var settings = new UISettings();
+		var color = e.WindowActivationState switch
+		{
+			CoreWindowActivationState.CodeActivated or
+			CoreWindowActivationState.PointerActivated => settings.UIElementColor(UIElementType.WindowText),
+			_ => settings.UIElementColor(UIElementType.GrayText)
+		};
+		TitleTextBlock.Foreground = new SolidColorBrush(color);
+	}
+
+	private void OnThemeChanged(ThemeListener sender)
+	{
+		UpdateSeparator();
+	}
+
+	private void UpdateSeparator()
+	{
+		var color = Application.Current.RequestedTheme switch
+		{
+			ApplicationTheme.Dark => Windows.UI.Colors.Gray,
+			_ => Windows.UI.Colors.Silver
+		};
+		SeparatorBrush = new SolidColorBrush(color);
+	}
+
+	private void OnChartedClick(object sender, RoutedEventArgs e)
+	{
+		IsCharted = !IsCharted;
+		UpdateChartedButton();
+	}
+
+	private void UpdateChartedButton()
+	{
+		this.ChartedButton.Content = $"{(IsCharted ? "Hide" : "Show")} chart";
 	}
 }

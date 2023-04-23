@@ -70,15 +70,6 @@ public class MainPageViewModel : ObservableObject
 	}
 	private double _durationOrigin = 0D;
 
-	public string DisplayName { get; } = Windows.ApplicationModel.Package.Current.DisplayName;
-	public string Version { get; } = GetVersion();
-
-	private static string GetVersion()
-	{
-		var v = Windows.ApplicationModel.Package.Current.Id.Version;
-		return $"{v.Major}.{v.Minor}.{v.Build}.{v.Revision}";
-	}
-
 	#endregion
 
 	#region Command
