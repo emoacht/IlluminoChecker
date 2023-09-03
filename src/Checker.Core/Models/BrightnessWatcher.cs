@@ -45,26 +45,30 @@ internal class BrightnessWatcher
 
 	private readonly object _lock = new();
 
+	/// <summary>
+	/// Report interval of brightness level
+	/// </summary>
+	/// <remarks>To revert to default, set TimeSpan.Zero.</remarks>
 	public TimeSpan ReportInterval
 	{
-		get => _reportInterval;
+		get => _timer?.Interval ?? _defaultReportInterval;
 		set
 		{
-			if (value <= TimeSpan.Zero)
-				return;
-
 			lock (_lock)
 			{
 				var isEnabled = _timer.IsEnabled;
 				_timer.Stop();
-				_timer.Interval = _reportInterval = value;
+
+				_timer.Interval = (value <= TimeSpan.Zero)
+					? _defaultReportInterval
+					: value;
 
 				if (isEnabled)
 					_timer.Start();
 			}
 		}
 	}
-	private TimeSpan _reportInterval = TimeSpan.FromSeconds(1);
+	private readonly TimeSpan _defaultReportInterval = TimeSpan.FromSeconds(1);
 
 	/// <summary>
 	/// Occurs when brightness level has changed.

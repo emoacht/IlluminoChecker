@@ -37,6 +37,7 @@ internal static class LightInformation
 	/// <summary>
 	/// Report interval for ambient light sensor
 	/// </summary>
+	/// <remarks>To revert to default, set TimeSpan.Zero.</remarks>
 	public static TimeSpan ReportInterval
 	{
 		get => TimeSpan.FromMilliseconds(_reportInterval);

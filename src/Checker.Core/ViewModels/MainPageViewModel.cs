@@ -34,6 +34,18 @@ public class MainPageViewModel : ObservableObject
 	}
 	private int _brightness;
 
+	public TimeSpan IlluminanceUpdateInterval
+	{
+		get => LightInformation.ReportInterval;
+		set => LightInformation.ReportInterval = value;
+	}
+
+	public TimeSpan BrightnessUpdateInterval
+	{
+		get => _brightnessWatcher.ReportInterval;
+		set => _brightnessWatcher.ReportInterval = value;
+	}
+
 	public int DurationIndex
 	{
 		get
