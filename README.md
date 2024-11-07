@@ -27,6 +27,14 @@ In addition, this app records the sequence of illuminance and brightness to inte
 
 <a href='//www.microsoft.com/store/apps/9plrgv8zz4k7?cid=storebadge&ocid=badge'><img src='https://developer.microsoft.com/store/badges/images/English_get-it-from-MS.png' alt='Illumino Checker' width='142px' height='52px'/></a>
 
+## Remarks
+
+This app will go suspended 25 seconds after being minimized. This is common for all UWP apps.
+
+This suspension can be avoided using `extendedBackgroundTaskTime` capability. But it will prevent this app from being distributed by Microsoft Store.
+
+- [Run background tasks indefinitely](https://learn.microsoft.com/en-us/windows/uwp/launch-resume/run-in-the-background-indefinetly#run-background-tasks-indefinitely)
+
 ## License
 
  - MIT License
